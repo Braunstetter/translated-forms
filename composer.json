@@ -1,0 +1,20 @@
+{
+  "name": "braunstetter/translated-forms",
+  "description": "Translate your forms. Simple and easy.",
+  "type": "symfony-bundle",
+  "keywords": ["form", "translate"],
+  "license": "MIT",
+  "require": {
+    "knplabs/doctrine-behaviors": "^2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Braunstetter\\TranslatedForms\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Braunstetter\\TranslatedForms\\Tests\\": "tests"
+    }
+  }
+}
