@@ -1,0 +1,33 @@
+parameters:
+  env(DB_ENGINE): "pdo_sqlite" # also pdo_pgsql, pdo_mysql
+  env(DB_HOST): "localhost"
+  env(DB_NAME): "orm_behaviors_test"
+  env(DB_USER): "root"
+  env(DB_PASSWD): ""
+  env(DB_MEMORY): "true"
+  kernel.secret: "for_framework_bundle"
+  locale: "en"
+
+imports:
+  - { resource: doctrine.yaml }
+  - { resource: framework.yaml }
+  - { resource: twig.yaml }
+
+services:
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    public: true
+
+  Braunstetter\TranslatedForms\Tests\Functional\DatabaseLoader: null
+  Braunstetter\TranslatedForms\Tests\Functional\app\src\FormProvider: null
+
+  Knp\DoctrineBehaviors\Tests\Provider\TestUserProvider:
+    alias: Knp\DoctrineBehaviors\Contract\Provider\UserProviderInterface
+
+  Braunstetter\TranslatedForms\Tests\Functional\app\src\Controller\TestController:
+    tags: [controller.service_arguments, controller.service_subscriber]
+    public: true
+    arguments:
+      - '@Twig_Environment'
