@@ -6,105 +6,77 @@ namespace Braunstetter\TranslatedForms\Tests\Functional;
 use Braunstetter\TranslatedForms\Tests\Fixtures\Entity\TranslatableEntity;
 use Braunstetter\TranslatedForms\Tests\Functional\app\src\Form\TranslatedEntryForm;
 use Braunstetter\TranslatedForms\Tests\Functional\app\src\FormProvider;
-use Doctrine\Persistence\ObjectRepository;
+use Braunstetter\TranslatedForms\Tests\Functional\app\src\Service\FixtureProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\Util\InheritDataAwareIterator;
-use Symfony\Component\HttpKernel\HttpKernelBrowser;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
-use Symfony\Component\VarDumper\VarDumper;
 
 class TranslatedFormsTest extends AbstractTestCase
 {
 
-    /**
-     * @var ObjectRepository<TranslatableEntity>
-     */
-    private ObjectRepository $repository;
+    private TranslatableEntity $translatedEntity;
+    private mixed $formFactory;
+    private KernelBrowser $client;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repository = $this->entityManager->getRepository(TranslatableEntity::class);
+        $this->translatedEntity = FixtureProvider::get();
+        $this->formFactory = $this->getService(FormProvider::class);
+        $this->client = new KernelBrowser($this->kernel);
     }
 
-    public function test_form_errors_when_not_translated(): void
+    public function test_form_errors_on_init_when_not_translated(): void
     {
-        $translatableEntity = new TranslatableEntity();
-        $translatableEntity->setUntranslatedString('this is untranslated');
-        $translatableEntity->translate('fr')
-            ->setTitle('fabuleux');
-        $translatableEntity->translate('en')
-            ->setTitle('awesome');
-        $translatableEntity->translate('ru')
-            ->setTitle('удивительный');
-        $translatableEntity->mergeNewTranslations();
-
-        $factory = $this->getService(FormProvider::class);
-
         $this->expectException(NoSuchPropertyException::class);
-        $factory->get()->create(TranslatedEntryForm::class, $translatableEntity, ['translated' => false]);
+        $this->formFactory->get()->create(TranslatedEntryForm::class, $this->translatedEntity, ['translated' => false]);
     }
 
-    public function test_form_errors_disappears_when_translated(): void
+    public function test_form_errors_on_init_disappears_when_translated(): void
     {
-        $translatableEntity = new TranslatableEntity();
-        $translatableEntity->setUntranslatedString('this is untranslated');
-        $translatableEntity->translate('fr')
-            ->setTitle('fabuleux');
-        $translatableEntity->translate('en')
-            ->setTitle('awesome');
-        $translatableEntity->translate('ru')
-            ->setTitle('удивительный');
-        $translatableEntity->mergeNewTranslations();
-
-        $factory = $this->getService(FormProvider::class);
-        $factory->get()->create(TranslatedEntryForm::class, $translatableEntity);
-
+        $this->formFactory->get()->create(TranslatedEntryForm::class, $this->translatedEntity);
         $this->assertTrue(true);
     }
 
-    public function test_new()
+    /**
+     * @dataProvider provideFormContent
+     */
+    public function test_request_contains_correct_values($content)
     {
-        $client = new KernelBrowser($this->kernel);
-        $client->request('GET', '/test');
+        $this->client->request('GET', '/test');
+        $this->client->submitForm('Submit', $content);
+        $this->assertSame($content, $this->client->getRequest()->request->all());
+    }
 
-        $contentArray = [
-            'translated_entry_form' => [
-                "submit" => "",
-                "untranslatedString" => "this is changed",
-                "title" => "awesome nice",
-            ]
-        ];
+    /**
+     * @dataProvider provideFormContent
+     */
+    public function test_changes_made_to_form_gets_mapped_correctly($content)
+    {
+        $this->client->request('GET', '/test');
+        $this->client->submitForm('Submit', $content);
+        $data = json_decode($this->client->getResponse()->getContent());
 
-        $client->submitForm('Submit', $contentArray);
-
-        $data = json_decode($client->getResponse()->getContent());
-
-        $this->assertSame(200, $client->getResponse()->getStatusCode());
-        $this->assertSame($contentArray, $client->getRequest()->request->all());
         $this->assertSame('this is changed', $data->untranslatedString);
         $this->assertSame('awesome nice', $data->title);
+    }
 
+    /**
+     * @dataProvider provideFormContent
+     */
+    public function test_form_submission_works($content)
+    {
+        $this->client->request('GET', '/test');
+        $this->client->submitForm('Submit', $content);
+
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
     }
 
     public function test_mapper_returns_null_if_view_data_is_empty()
     {
-        $translatableEntity = new TranslatableEntity();
-        $translatableEntity->setUntranslatedString('this is untranslated');
-        $translatableEntity->translate('fr')
-            ->setTitle('fabuleux');
-        $translatableEntity->translate('en')
-            ->setTitle('awesome');
-        $translatableEntity->translate('ru')
-            ->setTitle('удивительный');
-        $translatableEntity->mergeNewTranslations();
-
-        $factory = $this->getService(FormProvider::class);
-        $form = $factory->get()->create(TranslatedEntryForm::class, $translatableEntity);
-
+        $form = $this->formFactory->get()->create(TranslatedEntryForm::class, $this->translatedEntity);
         $viewData = null;
 
         $this->assertSame($form->getConfig()->getDataMapper()->mapFormsToData(
@@ -117,24 +89,23 @@ class TranslatedFormsTest extends AbstractTestCase
 
     public function test_mapper_returns_exception_if_view_data_is_string()
     {
-        $translatableEntity = new TranslatableEntity();
-        $translatableEntity->setUntranslatedString('this is untranslated');
-        $translatableEntity->translate('fr')
-            ->setTitle('fabuleux');
-        $translatableEntity->translate('en')
-            ->setTitle('awesome');
-        $translatableEntity->translate('ru')
-            ->setTitle('удивительный');
-        $translatableEntity->mergeNewTranslations();
-
-        $factory = $this->getService(FormProvider::class);
-        $form = $factory->get()->create(TranslatedEntryForm::class, $translatableEntity);
+        $form = $this->formFactory->get()->create(TranslatedEntryForm::class, $this->translatedEntity);
+        $viewData = '';
 
         $this->expectException(UnexpectedTypeException::class);
-        $viewData = '';
+
         $form->getConfig()->getDataMapper()->mapFormsToData(
             new \RecursiveIteratorIterator(new InheritDataAwareIterator(new \ArrayIterator($form->all()))),
             $viewData
         );
+    }
+
+    public function provideFormContent(): array
+    {
+        return [
+            [
+                ['translated_entry_form' => ["submit" => "", "untranslatedString" => "this is changed", "title" => "awesome nice",]]
+            ]
+        ];
     }
 }

@@ -23,9 +23,6 @@ services:
   Braunstetter\TranslatedForms\Tests\Functional\DatabaseLoader: null
   Braunstetter\TranslatedForms\Tests\Functional\app\src\FormProvider: null
 
-  Knp\DoctrineBehaviors\Tests\Provider\TestUserProvider:
-    alias: Knp\DoctrineBehaviors\Contract\Provider\UserProviderInterface
-
   Braunstetter\TranslatedForms\Tests\Functional\app\src\Controller\TestController:
     tags: [controller.service_arguments, controller.service_subscriber]
     public: true
