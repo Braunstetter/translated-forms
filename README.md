@@ -24,6 +24,12 @@ public function configureOptions(OptionsResolver $resolver): void
 When this is set to true your form will react to the current locale inside your request object.
 > It is important to use [Proxy Translations](https://github.com/KnpLabs/DoctrineBehaviors/blob/master/docs/translatable.md#proxy-translations) to allow this bundle to read data by a magic method.
 
+## Custom Traits
+Knp Doctrine Behaviours brings some Traits to your translatable Entities and your translations. By default, it assumes you put the translation Entity into the same folder as the translatable. This gets quite messy, as soon as you translate a lot. 
+So this bundle delivers two traits. [TranslatableTrait](src/Entity/Trait/TranslatableTrait.php) and [TranslationTrait](src/Entity/Trait/TranslationTrait.php). 
+
+They work just the same way as the default one's form Knp (in fact they use it under the hood), but they put translations into a `Translation` folder - and they implement the magic `__call` method which is required for this bundle to translate your forms.
+
 ## How does it work?
 
 ### Reading the data (mapDataToForms)
@@ -33,6 +39,8 @@ If enabled this bundle sets a new data mapper to your forms. The default data ma
 When data of a form is going to be read - this data mapper tries to save it the normal way. When the field of the base entity is not writeable directly it is going to pick the current translation and is writing it into it.   
 
 ### Why should you use this bundle?
-There is a popular bundle [a2lix/translation-form-bundle](https://github.com/a2lix/TranslationFormBundle). 
+There is the popular [a2lix/translation-form-bundle](https://github.com/a2lix/TranslationFormBundle). 
 It is actively maintained and if you like it - you can stick to it. 
-But to use `a2lix/translation-form-bundle` there is some CSS and Javascript required. `braunstetter/translated-forms` will just work fine with all your Symfony forms. No extra CSS no Javascript. Just switch the language and even nested forms are translated.
+But to use `a2lix/translation-form-bundle` there is some CSS and Javascript required. Also, it comes with a dedicated FormType. So you have to wrap every field inside this FormType. It provides these clickable tabs for every single translated field, which is not so handy, when you just want to translate your whole form. 
+
+`braunstetter/translated-forms` will just work fine with all your Symfony forms. No extra CSS no Javascript no extra FormType to implement. Your forms stay the same. Just switch the languages and even nested forms are translated.
