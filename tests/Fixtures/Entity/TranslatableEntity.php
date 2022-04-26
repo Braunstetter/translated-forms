@@ -2,7 +2,7 @@
 
 namespace Braunstetter\TranslatedForms\Tests\Fixtures\Entity;
 
-use Braunstetter\TranslatedForms\Entity\Trait\TranslatableTrait;
+use Braunstetter\TranslatedForms\Entity\Traits\TranslatableTrait;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Braunstetter\TranslatedForms\Tests\Fixtures\Entity\Translation;
 
-use Braunstetter\TranslatedForms\Entity\Trait\TranslationTrait;
+use Braunstetter\TranslatedForms\Entity\Traits\TranslationTrait;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Braunstetter\TranslatedForms\Entity\Trait;
+namespace Braunstetter\TranslatedForms\Entity\Traits;
 
 use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait as KnpTranslatableTrait;
 
