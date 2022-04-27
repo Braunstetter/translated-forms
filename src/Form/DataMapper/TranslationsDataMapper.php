@@ -65,51 +65,49 @@ class TranslationsDataMapper implements DataMapperInterface
             throw new UnexpectedTypeException($viewData, 'object, array or empty');
         }
 
-        $this->mapForms($forms, $viewData);
+        $this->writeFormsToData($forms, $viewData);
     }
 
-    private function mapForms(array|Traversable $forms, mixed &$viewData)
+    private function writeFormsToData(array|Traversable $forms, mixed &$viewData)
     {
         /** @var FormInterface $form */
         foreach ($forms as $form) {
-         $this->tryToWriteWithDefaultMapper($form, $viewData);
-         $this->tryToWriteWithMacigMapper($form, $viewData);
+            $this->tryToWriteWithDefaultMapper($form, $viewData);
+            $this->tryToWriteWithMagicMapper($form, $viewData);
         }
     }
 
     private function tryToWriteWithDefaultMapper(FormInterface $form, mixed &$viewData)
     {
-        $config = $form->getConfig();
-
         // Just the normal native DataMapper process after checking
         // if the value is writeable on the underlying object/array.
-        if ($this->propertyAccessor->isWritable($viewData, $form->getName()) && $config->getMapped()) {
+        if ($this->isWriteable($viewData, $form) && $this->formIsSubmittedAndReady($form) && $this->formDataAccessor->isWritable($viewData, $form)) {
+            $this->formDataAccessor->setValue($viewData, $form->getData(), $form);
+        }
+    }
 
-            // Write-back is disabled if the form is not synchronized (transformation failed),
-            // if the form was not submitted and if the form is disabled (modification not allowed)
-            if ($form->isSubmitted() && $form->isSynchronized() && !$form->isDisabled() && $this->formDataAccessor->isWritable($viewData, $form)) {
-                $this->formDataAccessor->setValue($viewData, $form->getData(), $form);
+    private function tryToWriteWithMagicMapper(FormInterface $form, mixed &$viewData)
+    {
+
+        //  The data is mapped but can not be read from the object
+        //  try to map it to the translation
+        if (!$this->isWriteable($viewData, $form) && $this->formIsSubmittedAndReady($form) && $viewData instanceof TranslatableInterface) {
+            $translation = $viewData->translate($this->requestStack->getCurrentRequest()->getLocale(), false);
+
+            if ($this->formDataAccessor->isWritable($translation, $form)) {
+                $this->formDataAccessor->setValue($translation, $form->getData(), $form);
+                $viewData->mergeNewTranslations();
             }
         }
     }
 
-    private function tryToWriteWithMacigMapper(FormInterface $form, mixed &$viewData)
+    private function isWriteable(mixed $viewData, FormInterface $form): bool
     {
-        $config = $form->getConfig();
+        return $this->propertyAccessor->isWritable($viewData, $form->getName());
+    }
 
-        //  The data is mapped but can not be read from the object
-        //  try to map it to the translation
-        if (!$this->propertyAccessor->isWritable($viewData, $form->getName()) && $config->getMapped()) {
-            $currentLocale = $this->requestStack->getCurrentRequest()->getLocale();
-
-            if ($viewData instanceof TranslatableInterface && $config->getMapped() && $form->isSubmitted() && $form->isSynchronized() && !$form->isDisabled()) {
-                $translation = $viewData->translate($currentLocale, false);
-
-                if ($this->formDataAccessor->isWritable($translation, $form)) {
-                    $this->formDataAccessor->setValue($translation, $form->getData(), $form);
-                    $viewData->mergeNewTranslations();
-                }
-            }
-        }
+    private function formIsSubmittedAndReady(FormInterface $form): bool
+    {
+        return $form->isSubmitted() && $form->isSynchronized() && !$form->isDisabled() && $form->getConfig()->getMapped();
     }
 }
