@@ -9,7 +9,6 @@ use Doctrine\ORM\Tools\ToolsException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\VarDumper\VarDumper;
 
 class AbstractTestCase extends TestCase
 {

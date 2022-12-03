@@ -25,6 +25,4 @@ class TranslatedEntryForm extends AbstractType
             'translated' => true
         ]);
     }
-
-
 }

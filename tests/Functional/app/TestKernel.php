@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Braunstetter\TranslatedForms\Tests\Functional\app;
 
 use Braunstetter\TranslatedForms\TranslatedFormsBundle;
@@ -13,7 +11,6 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\VarDumper\VarDumper;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 
 final class TestKernel extends Kernel

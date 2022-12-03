@@ -1,6 +1,6 @@
 <?php
 
-namespace Rock\Tests;
+namespace Braunstetter\TranslatedForms\Tests;
 
 use Braunstetter\TranslatedForms\DependencyInjection\TranslatedFormsExtension;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionConfigurationTestCase;
