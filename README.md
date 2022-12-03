@@ -2,8 +2,9 @@
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Braunstetter/translated-forms/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/Braunstetter/menu-bundle/?branch=main)
 [![Build Status](https://app.travis-ci.com/Braunstetter/translated-forms.svg?branch=main)](https://app.travis-ci.com/Braunstetter/menu-bundle)
-[![Total Downloads](http://poser.pugx.org/braunstetter/translated-forms/downloads)](https://packagist.org/packages/braunstetter/translated-forms)
 [![License](http://poser.pugx.org/braunstetter/translated-forms/license)](https://packagist.org/packages/braunstetter/translated-forms)
+
+[//]: # ([![Total Downloads]&#40;http://poser.pugx.org/braunstetter/translated-forms/downloads&#41;]&#40;https://packagist.org/packages/braunstetter/translated-forms&#41;)
 
 This bundle gives you a `translated` option for your Symfony forms. So when you switch languages your forms are translated and work just fine. 
 
